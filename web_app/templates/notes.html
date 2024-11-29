@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>笔记本</title>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 250px;
+            background-color: #f4f4f4;
+            border-right: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        #sidebar h3 {
+            margin-top: 0;
+        }
+        #sidebar button {
+            display: block;
+            width: 100%;
+            margin: 5px 0;
+            padding: 10px;
+            text-align: left;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        #sidebar button:hover {
+            background-color: #e0e0e0;
+        }
+        #main {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #fff;
+        }
+        #note-content {
+            border: 1px solid #ccc;
+            padding: 20px;
+            background-color: #fff;
+            overflow-y: auto;
+            max-height: calc(100vh - 40px);
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h3>笔记目录</h3>
+        <!-- 文件列表按钮 -->
+        {% for file in files %}
+        <button onclick="loadContent('{{ file }}')">{{ file }}</button>
+        {% endfor %}
+    </div>
+    <div id="main">
+        <h3>笔记内容</h3>
+        <div id="note-content">请选择左侧的笔记查看内容。</div>
+    </div>
+
+    <script>
+        const md = window.markdownit();
+
+        function loadContent(filename) {
+            fetch(`/notes/${filename}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.content) {
+                        const content = md.render(data.content);
+                        document.getElementById('note-content').innerHTML = content;
+                    } else {
+                        document.getElementById('note-content').innerHTML = "无法加载笔记内容";
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

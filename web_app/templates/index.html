@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习助手</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+        let currentMode = "assistant"; // 默认模式为助手模式
+
+        function toggleMode() {
+            const modeButton = document.getElementById("modeButton");
+            if (currentMode === "assistant") {
+                currentMode = "conversation";
+                modeButton.textContent = "对话模式";
+                modeButton.classList.remove("assistant-mode");
+                modeButton.classList.add("conversation-mode");
+            } else {
+                currentMode = "assistant";
+                modeButton.textContent = "助手模式";
+                modeButton.classList.remove("conversation-mode");
+                modeButton.classList.add("assistant-mode");
+            }
+        }
+
+        async function sendMessage(event) {
+            event.preventDefault();
+
+            const userInput = document.getElementById("user_input").value;
+            if (!userInput.trim()) return;
+
+            const chatBody = document.getElementById("chatBody");
+            chatBody.innerHTML += `
+                <div class="message user">
+                    <div class="bubble">${userInput}</div>
+                </div>
+            `;
+
+            document.getElementById("user_input").value = "";
+
+            const loadingMessage = document.createElement("div");
+            loadingMessage.className = "message assistant";
+            loadingMessage.innerHTML = `<div class="bubble">正在处理您的请求...</div>`;
+            chatBody.appendChild(loadingMessage);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            try {
+                const response = await fetch("/reply", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ user_input: userInput, mode: currentMode })
+                });
+                const data = await response.json();
+
+                if (data.reply) {
+                    loadingMessage.querySelector(".bubble").innerHTML = data.reply;
+                } else {
+                    loadingMessage.querySelector(".bubble").textContent = "抱歉，我无法处理您的请求。";
+                }
+            } catch (error) {
+                loadingMessage.querySelector(".bubble").textContent = "发生错误，请稍后重试。";
+                console.error("Error:", error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>学习助手</h1>
+        </div>
+        <div class="chat-body" id="chatBody"></div>
+        <div class="chat-footer">
+            <!-- 模式切换按钮 -->
+            <button id="modeButton" class="mode-button assistant-mode" onclick="toggleMode()">助手模式</button>
+            <form onsubmit="sendMessage(event)">
+                <input type="text" id="user_input" placeholder="请输入内容">
+                <button type="submit">发送</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
