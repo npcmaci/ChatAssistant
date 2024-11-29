@@ -10,8 +10,8 @@ import json
 app = Flask(__name__)
 
 # API Key 和 Secret Key
-API_KEY = 'c9z0qNKcD8buZ29bn9OU61JN'
-SECRET_KEY = 'gJ5fdTraQ8FblGni5HJJgB7ZHK06bYPv'
+API_KEY = '*******'
+SECRET_KEY = '*******'
 
 # 全局变量：记录最近打开的语言和链接
 recent_language = {}
